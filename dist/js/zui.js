@@ -1,8 +1,8 @@
 /*!
- * ZUI: Standard edition - v1.9.0 - 2019-03-19
+ * ZUI: Standard edition - v1.8.1 - 2018-01-18
  * http://zui.sexy
- * GitHub: https://github.com/easysoft/zui.git 
- * Copyright (c) 2019 cnezsoft.com; Licensed MIT
+ * GitHub: https://github.com/easysoft/zui.git
+ * Copyright (c) 2018 cnezsoft.com; Licensed MIT
  */
 
 /*! Some code copy from Bootstrap v3.0.0 by @fat and @mdo. (Copyright 2013 Twitter, Inc. Licensed under http://www.apache.org/licenses/)*/
@@ -37,9 +37,8 @@
 
     var lastUuidAmend = 0;
     $.zui({
-        uuid: function(asNumber) {
-            var uuidNumber = (new Date()).getTime() * 1000 + (lastUuidAmend++) % 1000;
-            return asNumber ? uuidNumber : uuidNumber.toString(36);
+        uuid: function() {
+            return(new Date()).getTime() * 1000 + (lastUuidAmend++) % 1000;
         },
 
         callEvent: function(func, event, proxy) {
@@ -150,7 +149,7 @@
 /* ========================================================================
  * Bootstrap: button.js v3.0.3
  * http://getbootstrap.com/javascript/#buttons
- * 
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * Bootsrap version in the future.
  * http://zui.sexy
@@ -326,8 +325,8 @@
 
         $.support.transition && $parent.hasClass('fade') ?
             $parent
-            .one($.support.transition.end, removeElement)
-            .emulateTransitionEnd(150) :
+                .one($.support.transition.end, removeElement)
+                .emulateTransitionEnd(150) :
             removeElement()
     }
 
@@ -374,20 +373,19 @@
  * ======================================================================== */
 
 
-(function($, undefined) {
+(function($) {
     'use strict';
 
     var NAME = 'zui.pager'; // model name
 
     var DEFAULT_PAGER = {
-        page: 1,        // current page index
+        page: 0,        // current page index
         recTotal: 0,    // records total count
         recPerPage: 10, // records count per page
     };
 
     var LANG = {
         zh_cn: {
-            pageOfText: '第 {0} 页',
             prev: '上一页',
             next: '下一页',
             first: '第一页',
@@ -401,7 +399,6 @@
             pageOfTotal: '第 <strong>{page}</strong>/<strong>{totalPage}</strong> 页'
         },
         zh_tw: {
-            pageOfText: '第 {0} 頁',
             prev: '上一頁',
             next: '下一頁',
             first: '第一頁',
@@ -415,7 +412,6 @@
             pageOfTotal: '第 <strong>{page}</strong>/<strong>{totalPage}</strong> 頁'
         },
         en: {
-            pageOfText: 'Page {0}',
             prev: 'Prev',
             next: 'Next',
             first: 'First',
@@ -423,8 +419,8 @@
             goto: 'Goto',
             pageOf: 'Page <strong>{page}</strong>',
             totalPage: '<strong>{totalPage}</strong> pages',
-            totalCount: '<strong>{recTotal}</strong> in total',
-            pageSize: '<strong>{recPerPage}</strong> per page',
+            totalCount: '<strong>{recTotal}</strong> items',
+            pageSize: '<strong>{recPerPage}</strong> items per page',
             itemsRange: 'From <strong>{start}</strong> to <strong>{end}</strong>',
             pageOfTotal: 'Page <strong>{page}</strong> of <strong>{totalPage}</strong>'
         }
@@ -438,12 +434,12 @@
 
         options = that.options = $.extend({}, Pager.DEFAULTS, this.$.data(), options);
 
-        var lang   = options.lang || $.zui.clientLang();
+        var lang   = options.lang || 'zh_cn';
         that.lang  = $.isPlainObject(lang) ? ($.extend(true, {}, LANG[lang.lang || $.zui.clientLang()], lang)) : LANG[lang];
 
         that.state = {};
 
-        that.set(options.page, options.recTotal, options.recPerPage, true);
+        that.set(options.page, options.recTotal, options.recPerPage);
 
         that.$.on('click', '.pager-goto-btn', function() {
             var $goto = $(this).closest('.pager-goto');
@@ -464,7 +460,7 @@
         });
     };
 
-    Pager.prototype.set = function(page, recTotal, recPerPage, notTiggerChange) {
+    Pager.prototype.set = function(page, recTotal, recPerPage) {
         var that = this;
         if (typeof page === 'object' && page !== null) {
             recPerPage = page.recPerPage;
@@ -502,7 +498,7 @@
         state.prev  = state.page > 1 ? (state.page - 1) : 0;
         state.next  = state.page < state.totalPage ? (state.page + 1) : 0;
         that.state  = state;
-        if (!notTiggerChange && (oldState.page !== state.page || oldState.recTotal !== state.recTotal || oldState.recPerPage !== state.recPerPage)) {
+        if (oldState.page !== state.page || oldState.recTotal !== state.recTotal || oldState.recPerPage !== state.recPerPage) {
             that.$.callComEvent(that, 'onPageChange', [state, oldState]);
         }
         return that.render();
@@ -513,9 +509,9 @@
         if (text === undefined) {
             text = page;
         }
-        var $ele = $('<a title="' + that.lang.pageOfText.format(page) + '" class="pager-item" data-page="' + page + '"/>').attr('href', page ? that.createLink(page, that.state) : '###').html(text);
+        var $ele = $('<a class="pager-item" data-page="' + page + '"/>').attr('href', page ? that.createLink(page, that.state) : '###').html(text);
         if (!asAElement) {
-            $ele = $('<li />').append($ele).toggleClass('active', page === that.state.page).toggleClass('disabled', !page || page === that.state.page);
+            $ele = $('<li />').append($ele).toggleClass('active', page === that.state.page).toggleClass('disabled', !page);
         }
         return $ele;
     };
@@ -528,7 +524,7 @@
         var page = pager.page;
         var appendItem = function(p, to) {
             if(p === false) {
-                $nav.append(that.createLinkItem(0, to || that.options.navEllipsisItem));
+                $nav.append(that.createLinkItem(0, to || '<i class="icon icon-ellipsis-h"></i>'));
                 return;
             }
             if(to === undefined) to = p;
@@ -585,7 +581,7 @@
             var $li = $('<li><a href="###" data-size="' + size + '">' + size + '</a></li>').toggleClass('active', size === pager.recPerPage);
             $menu.append($li);
         }
-        return $('<div class="btn-group pager-size-menu"><button type="button" class="btn dropdown-toggle" data-toggle="dropdown">' + that.lang.pageSize.format(pager) + ' <span class="caret"></span></button></div>').addClass(that.options.menuDirection).append($menu);
+        return $('<div class="btn-group pager-size-menu"><button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">' + that.lang.pageSize.format(pager) + ' <span class="caret"></span></button></div>').addClass(that.options.menuDirection).append($menu);
     };
 
     Pager.prototype.createElement = function(element, $pager, pager) {
@@ -602,13 +598,13 @@
             case 'next_icon':
                 return createLinkItem(pager.next, '<i class="icon ' + that.options.nextIcon + '"></i>');
             case 'first':
-                return createLinkItem(1, lang.first);
+                return createLinkItem(1, lang.first, true);
             case 'first_icon':
-                return createLinkItem(1, '<i class="icon ' + that.options.firstIcon + '"></i>');
+                return createLinkItem(1, '<i class="icon ' + that.options.firstIcon + '"></i>', true);
             case 'last':
-                return createLinkItem(pager.totalPage, lang.last);
+                return createLinkItem(pager.totalPage, lang.last, true);
             case 'last_icon':
-                return createLinkItem(pager.totalPage, '<i class="icon ' + that.options.lastIcon + '"></i>');
+                return createLinkItem(pager.totalPage, '<i class="icon ' + that.options.lastIcon + '"></i>', true);
             case 'space':
             case '|':
                 return $('<li class="space" />');
@@ -633,17 +629,11 @@
             case 'size_menu':
                 return that.createSizeMenu();
             default:
-                return $('<li/>').html(element.format(pager));
+                return $('<li/>').html(element);
         }
     };
 
     Pager.prototype.createLink = function(page, pager) {
-        if (page === undefined) {
-            page = this.state.page;
-        }
-        if (pager === undefined) {
-            pager = this.state;
-        }
         var linkCreator = this.options.linkCreator;
         if (typeof linkCreator === 'string') {
             return linkCreator.format($.extend({}, pager, {page: page}));
@@ -696,9 +686,6 @@
             }
             $lastItem = isItem ? $li : null;
         });
-        if ($lastItem) {
-            $lastItem.addClass('pager-item-right');
-        }
 
         that.$.callComEvent(that, 'onRender', [state]);
         return that;
@@ -711,7 +698,6 @@
         nextIcon: 'icon-double-angle-right',
         firstIcon: 'icon-step-backward',
         lastIcon: 'icon-step-forward',
-        navEllipsisItem: '<i class="icon icon-ellipsis-h"></i>',
         maxNavCount: 10,
         menuDirection: 'dropdown', // or dropup
         pageSizeOptions: [10, 20, 30, 50, 100],
@@ -739,13 +725,13 @@
     $(function() {
         $('[data-ride="pager"]').pager();
     });
-}(jQuery, undefined));
+}(jQuery));
 
 
 /* ========================================================================
  * Bootstrap: tab.js v3.0.0
  * http://twbs.github.com/bootstrap/javascript.html#tabs
- *  
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * Bootsrap version in the future.
  * http://zui.sexy
@@ -837,8 +823,8 @@
 
         transition ?
             $active
-            .one($.support.transition.end, next)
-            .emulateTransitionEnd(150) :
+                .one($.support.transition.end, next)
+                .emulateTransitionEnd(150) :
             next()
 
         $active.removeClass('in')
@@ -886,7 +872,7 @@
 /* ========================================================================
  * Bootstrap: transition.js v3.2.0
  * http://getbootstrap.com/javascript/#transitions
- *  
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * Bootsrap version in the future.
  * http://zui.sexy
@@ -957,7 +943,7 @@
 /* ========================================================================
  * Bootstrap: collapse.js v3.0.0
  * http://twbs.github.com/bootstrap/javascript.html#collapse
- * 
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * Bootsrap version in the future.
  * http://zui.sexy
@@ -1194,7 +1180,7 @@
  * ======================================================================== */
 
 
-(function ($) {
+(function($) {
     'use strict';
 
     var browseHappyTip = {
@@ -1204,11 +1190,11 @@
     };
 
     // The browser modal class
-    var Browser = function () {
+    var Browser = function() {
         var ie = this.isIE() || this.isIE10() || false;
-        if (ie) {
-            for (var i = 10; i > 5; i--) {
-                if (this.isIE(i)) {
+        if(ie) {
+            for(var i = 10; i > 5; i--) {
+                if(this.isIE(i)) {
                     ie = i;
                     break;
                 }
@@ -1221,12 +1207,12 @@
     };
 
     // Append CSS class to html tag
-    Browser.prototype.cssHelper = function () {
+    Browser.prototype.cssHelper = function() {
         var ie = this.ie,
             $html = $('html');
         $html.toggleClass('ie', ie)
             .removeClass('ie-6 ie-7 ie-8 ie-9 ie-10');
-        if (ie) {
+        if(ie) {
             $html.addClass('ie-' + ie)
                 .toggleClass('gt-ie-7 gte-ie-8 support-ie', ie >= 8)
                 .toggleClass('lte-ie-7 lt-ie-8 outdated-ie', ie < 8)
@@ -1238,9 +1224,9 @@
     };
 
     // Show browse happy tip
-    Browser.prototype.tip = function (showCoontent) {
+    Browser.prototype.tip = function(showCoontent) {
         var $browseHappy = $('#browseHappyTip');
-        if (!$browseHappy.length) {
+        if(!$browseHappy.length) {
             $browseHappy = $('<div id="browseHappyTip" class="alert alert-dismissable alert-danger-inverse alert-block" style="position: relative; z-index: 99999"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><div class="container"><div class="content text-center"></div></div></div>');
             $browseHappy.prependTo('body');
         }
@@ -1249,15 +1235,15 @@
     };
 
     // Detect it is IE, can given a version
-    Browser.prototype.isIE = function (version) {
-        if (version === 10) return this.isIE10();
+    Browser.prototype.isIE = function(version) {
+        if(version === 10) return this.isIE10();
         var b = document.createElement('b');
         b.innerHTML = '<!--[if IE ' + (version || '') + ']><i></i><![endif]-->';
         return b.getElementsByTagName('i').length === 1;
     };
 
     // Detect ie 10 with hack
-    Browser.prototype.isIE10 = function () {
+    Browser.prototype.isIE10 = function() {
         return (/*@cc_on!@*/false);
     };
 
@@ -1265,9 +1251,9 @@
         browser: new Browser()
     });
 
-    $(function () {
-        if (!$('body').hasClass('disabled-browser-tip')) {
-            if ($.zui.browser.ie && $.zui.browser.ie < 8) {
+    $(function() {
+        if(!$('body').hasClass('disabled-browser-tip')) {
+            if($.zui.browser.ie && $.zui.browser.ie < 8) {
                 $.zui.browser.tip();
             }
         }
@@ -1614,7 +1600,7 @@
 /* ========================================================================
  * Resize: resize.js [Version: 1.1]
  * http://benalman.com/projects/jquery-resize-plugin/
- *  
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * official version in the future.
  * http://zui.sexy
@@ -1883,7 +1869,7 @@
 /* ========================================================================
  * Bootstrap: scrollspy.js v3.0.3
  * http://getbootstrap.com/javascript/#scrollspy
- *  
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * Bootsrap version in the future.
  * http://zui.sexy
@@ -2303,6 +2289,7 @@
             };
 
             that.$input = $input = $input.first();
+            that.lastValue = that.getSearch();
 
             $input.on(options.listenEvent, function(params) {
                 that.changeTimer = setTimeout(function() {
@@ -2316,7 +2303,7 @@
                 that.$.callComEvent(that, 'onBlur', [e]);
             }).on('keydown', function(e) {
                 var handled = 0;
-                var keyCode = e.which;
+                var keyCode = e.witch;
                 if (keyCode === 27 && options.escToClear) { // esc
                     this.setSearch('', true);
                     handleChange();
@@ -2337,7 +2324,6 @@
             that.$.on('click', '.search-clear-btn', function(e) {
                 that.setSearch('', true);
                 handleChange();
-                that.focus();
                 e.preventDefault();
             });
 
@@ -2414,11 +2400,11 @@
 
     var NAME     = 'zui.draggable',
         DEFAULTS = {
-        // selector: '',
-        container: 'body',
-        move: true
-        // mouseButton: -1 // 0, 1, 2, -1, all, left,  right, middle
-    };
+            // selector: '',
+            container: 'body',
+            move: true
+            // mouseButton: -1 // 0, 1, 2, -1, all, left,  right, middle
+        };
     var idIncrementer = 0;
 
     var Draggable = function(element, options) {
@@ -2456,7 +2442,7 @@
         var mouseMove = function(event) {
             var mX      = event.pageX,
                 mY      = event.pageY;
-                moved   = true;
+            moved   = true;
             var dragPos = {
                 left: mX - startOffset.x,
                 top: mY - startOffset.y
@@ -2553,17 +2539,17 @@
 
             var $container = $(setting.container),
                 pos        = $ele.offset();
-                cPos       = $container.offset();
-                startPos   = {
-                    x: event.pageX,
-                    y: event.pageY
-                };
-                startOffset = {
-                    x: event.pageX - pos.left + cPos.left,
-                    y: event.pageY - pos.top + cPos.top
-                };
-                mousePos    = $.extend({}, startPos);
-                moved       = false;
+            cPos       = $container.offset();
+            startPos   = {
+                x: event.pageX,
+                y: event.pageY
+            };
+            startOffset = {
+                x: event.pageX - pos.left + cPos.left,
+                y: event.pageY - pos.top + cPos.top
+            };
+            mousePos    = $.extend({}, startPos);
+            moved       = false;
 
             $ele.addClass('drag-ready');
             event.preventDefault();
@@ -2619,18 +2605,17 @@
 
     var NAME     = 'zui.droppable',
         DEFAULTS = {
-        // container: '',
-        // selector: '',
-        // handle: '',
-        // flex: false,
-        // nested: false,
-        target: '.droppable-target',
-        deviation: 5,
-        sensorOffsetX: 0,
-        sensorOffsetY: 0,
-        dropToClass: 'drop-to',
-         // mouseButton: -1 // 0, 1, 2, -1, all, left,  right, middle
-    };
+            // container: '',
+            // selector: '',
+            // handle: '',
+            // flex: false,
+            // nested: false,
+            target: '.droppable-target',
+            deviation: 5,
+            sensorOffsetX: 0,
+            sensorOffsetY: 0,
+            // mouseButton: -1 // 0, 1, 2, -1, all, left,  right, middle
+        };
     var idIncrementer = 0;
 
     var Droppable = function(element, options) {
@@ -2662,7 +2647,6 @@
             flex           = setting.flex,
             container      = setting.container,
             canMoveHere    = setting.canMoveHere,
-            dropToClass    = setting.dropToClass,
             $ele           = $root,
             isMouseDown    = false,
             $container     = container ? $(setting.container).first() : (selector ? $root : $('body')),
@@ -2705,8 +2689,7 @@
 
                 that.trigger('start', {
                     event:   event,
-                    element: $ele,
-                    targets: $targets
+                    element: $ele
                 });
             }
 
@@ -2722,10 +2705,10 @@
             $.extend(lastMouseOffset, mouseOffset);
 
             var isNew = false;
-                isIn = false;
+            isIn = false;
 
             if(!flex) {
-                $targets.removeClass(dropToClass);
+                $targets.removeClass('drop-to');
             }
 
             var $newTarget = null;
@@ -2738,7 +2721,7 @@
                     tY   = tPos.top + setting.sensorOffsetY;
 
                 if(mouseOffset.left > tX && mouseOffset.top > tY && mouseOffset.left < (tX + tW) && mouseOffset.top < (tY + tH)) {
-                    if($newTarget) $newTarget.removeClass(dropToClass);
+                    if($newTarget) $newTarget.removeClass('drop-to');
                     $newTarget = t;
                     if(!setting.nested) return false;
                 }
@@ -2751,9 +2734,9 @@
                 if($target === null || ($target.data('id') !== id && (!isSelf))) isNew = true;
                 $target = $newTarget;
                 if(flex) {
-                    $targets.removeClass(dropToClass);
+                    $targets.removeClass('drop-to');
                 }
-                $target.addClass(dropToClass);
+                $target.addClass('drop-to');
             }
 
 
@@ -2844,7 +2827,7 @@
                 that.trigger('drop', eventOptions);
             }
 
-            $targets.removeClass(dropToClass);
+            $targets.removeClass('drop-to');
             $ele.removeClass('dragging').removeClass('drag-from');
             $shadow.remove();
             $shadow = null;
@@ -2878,16 +2861,14 @@
             }
 
             isMouseDown = true;
-            $targets         = $.isFunction(setting.target) ? setting.target($ele, $root) : $container.find(setting.target),
-            $target          = null,
-            $shadow          = null,
-            isIn             = false,
-            isSelf           = true,
-            oldCssPosition   = null,
-            startOffset      = $ele.offset(),
-            containerOffset  = $container.offset();
-            containerOffset.top = containerOffset.top - $container.scrollTop();
-            containerOffset.left = containerOffset.left - $container.scrollLeft();
+            $targets         = $.isFunction(setting.target) ? setting.target($root) : $container.find(setting.target),
+                $target          = null,
+                $shadow          = null,
+                isIn             = false,
+                isSelf           = true,
+                oldCssPosition   = null,
+                startOffset      = $ele.offset(),
+                containerOffset  = $container.offset();
             startMouseOffset = {left: event.pageX, top: event.pageY};
             lastMouseOffset  = $.extend({}, startMouseOffset);
             clickOffset      = {
@@ -2901,9 +2882,6 @@
                 $(document).on(mouseDownEvent, mouseUp);
             }, 10);
             event.preventDefault();
-            if(setting.stopPropagation) {
-                event.stopPropagation();
-            }
         };
 
         if(handle) {
@@ -2962,7 +2940,7 @@
  * 5. add setMoveable method to make modal dialog moveable
  * ======================================================================== */
 
-+ function($, undefined) {
++ function($) {
     'use strict';
 
     // MODAL CLASS DEFINITION
@@ -3002,9 +2980,7 @@
         show: true,
         // rememberPos: false,
         // moveable: false,
-        position: 'fit', // 'center' or '40px' or '10%',
-        // scrollInside: false,
-        // headerHeight: 'auto',
+        position: 'fit' // 'center' or '40px' or '10%'
     };
 
     var setDialogPos = function($dialog, pos) {
@@ -3021,39 +2997,13 @@
     Modal.prototype.ajustPosition = function(position) {
         var that = this;
         var options = that.options;
-        if(position === undefined) position = options.position;
-        if(position === undefined || position === null) return;
-        if ($.isFunction(position)) {
-            position = position(that);
-        }
+        if(typeof position === 'undefined') position = options.position;
+        if(typeof position === 'undefined') return;
         var $dialog = that.$element.find('.modal-dialog');
-        var winHeight = $(window).height();
+        // if($dialog.hasClass('modal-dragged')) return;
 
-        var bodyCss = {maxHeight: 'initial', overflow: 'visible'};
-        var $body = $dialog.find('.modal-body').css(bodyCss);
-        if (options.scrollInside) {
-            var headerHeight = options.headerHeight;
-            if (typeof headerHeight !== 'number') {
-                headerHeight = $dialog.find('.modal-header').height();
-            } else if ($.isFunction(headerHeight)) {
-                headerHeight = headerHeight($header);
-            }
-            bodyCss.maxHeight = winHeight - headerHeight;
-            if ($body.outerHeight() > bodyCss.maxHeight) {
-                bodyCss.overflow = 'auto';
-            }
-        }
-        $body.css(bodyCss);
-
-        var half = Math.max(0, (winHeight - $dialog.outerHeight()) / 2);
-        if (position === 'fit') {
-            position = {top: half > 50 ? Math.floor(half * 2 / 3) : half};
-        } else if (position === 'center') {
-            position = {top: half};
-        } else if (!$.isPlainObject(position)) {
-            position = {top: position};
-        }
-
+        var half = Math.max(0, ($(window).height() - $dialog.outerHeight()) / 2);
+        var topPos = position == 'fit' ? (half * 2 / 3) : (position == 'center' ? half : position);
         if($dialog.hasClass('modal-moveable')) {
             var pos = null;
             var rememberPos = options.rememberPos;
@@ -3064,14 +3014,19 @@
                     pos = $.zui.store.pageGet(zuiname + '.rememberPos.' + rememberPos);
                 }
             }
-            position = $.extend(position, {left: Math.max(0, ($(window).width() - $dialog.outerWidth()) / 2)}, pos);
+            if(!pos) {
+                pos = {
+                    left: Math.max(0, ($(window).width() - $dialog.outerWidth()) / 2),
+                    top: topPos
+                };
+            }
             if (options.moveable === 'inside') {
-                setDialogPos($dialog, position);
+                setDialogPos($dialog, pos);
             } else {
-                $dialog.css(position);
+                $dialog.css(pos);
             }
         } else {
-            $dialog.css(position);
+            $dialog.css('margin-top', topPos);
         }
     }
 
@@ -3087,10 +3042,7 @@
                 container: that.$element,
                 handle: '.modal-header',
                 before: function() {
-                    var marginTop = $dialog.css('margin-top');
-                    if (marginTop && marginTop !== '0px') {
-                        $dialog.css('top', marginTop).css('margin-top', '').addClass('modal-dragged');
-                    }
+                    $dialog.css('margin-top', '').addClass('modal-dragged');
                 },
                 finish: function(e) {
                     var rememberPos = options.rememberPos;
@@ -3116,8 +3068,6 @@
 
         that.$element.trigger(e)
 
-        that.$element.toggleClass('modal-scroll-inside', !!that.options.scrollInside);
-
         if(that.isShown || e.isDefaultPrevented()) return
 
         that.isShown = true
@@ -3125,17 +3075,12 @@
         if(that.options.moveable) that.setMoveale();
 
         that.checkScrollbar()
-        if (that.options.backdrop !== false) {
-            that.$body.addClass('modal-open')
-            that.setScrollbar()
-        }
+        that.$body.addClass('modal-open')
 
+        that.setScrollbar()
         that.escape()
 
-        that.$element.on('click.dismiss.' + zuiname, '[data-dismiss="modal"]',function(e) {
-            that.hide();
-            e.stopPropagation();
-        })
+        that.$element.on('click.dismiss.' + zuiname, '[data-dismiss="modal"]', $.proxy(that.hide, that))
 
         that.backdrop(function() {
             var transition = $.support.transition && that.$element.hasClass('fade')
@@ -3166,10 +3111,10 @@
 
             transition ?
                 that.$element.find('.modal-dialog') // wait for modal to slide in
-                .one('bsTransitionEnd', function() {
-                    that.$element.trigger('focus').trigger(e)
-                })
-                .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
+                    .one('bsTransitionEnd', function() {
+                        that.$element.trigger('focus').trigger(e)
+                    })
+                    .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
                 that.$element.trigger('focus').trigger(e)
         })
     }
@@ -3177,35 +3122,31 @@
     Modal.prototype.hide = function(e) {
         if(e) e.preventDefault()
 
-        var that = this;
-
         e = $.Event('hide.' + zuiname)
 
-        that.$element.trigger(e)
+        this.$element.trigger(e)
 
-        if(!that.isShown || e.isDefaultPrevented()) return
+        if(!this.isShown || e.isDefaultPrevented()) return
 
-        that.isShown = false
+        this.isShown = false
 
-        if (that.options.backdrop !== false) {
-            that.$body.removeClass('modal-open')
-            that.resetScrollbar()
-        }
+        this.$body.removeClass('modal-open')
 
-        that.escape()
+        this.resetScrollbar()
+        this.escape()
 
         $(document).off('focusin.' + zuiname)
 
-        that.$element
+        this.$element
             .removeClass('in')
             .attr('aria-hidden', true)
             .off('click.dismiss.' + zuiname)
 
-        $.support.transition && that.$element.hasClass('fade') ?
-            that.$element
-            .one('bsTransitionEnd', $.proxy(that.hideModal, that))
-            .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
-            that.hideModal()
+        $.support.transition && this.$element.hasClass('fade') ?
+            this.$element
+                .one('bsTransitionEnd', $.proxy(this.hideModal, this))
+                .emulateTransitionEnd(Modal.TRANSITION_DURATION) :
+            this.hideModal()
     }
 
     Modal.prototype.enforceFocus = function() {
@@ -3269,8 +3210,8 @@
 
             doAnimate ?
                 this.$backdrop
-                .one('bsTransitionEnd', callback)
-                .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
+                    .one('bsTransitionEnd', callback)
+                    .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
                 callback()
 
         } else if(!this.isShown && this.$backdrop) {
@@ -3282,8 +3223,8 @@
             }
             $.support.transition && this.$element.hasClass('fade') ?
                 this.$backdrop
-                .one('bsTransitionEnd', callbackRemove)
-                .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
+                    .one('bsTransitionEnd', callbackRemove)
+                    .emulateTransitionEnd(Modal.BACKDROP_TRANSITION_DURATION) :
                 callbackRemove()
 
         } else if(callback) {
@@ -3375,7 +3316,7 @@
         Plugin.call($target, option, this, $this.data('position'))
     })
 
-}(jQuery, undefined);
+}(jQuery);
 
 
 /* ========================================================================
@@ -3386,7 +3327,7 @@
  * ======================================================================== */
 
 
-(function($, window, undefined) {
+(function($, window) {
     'use strict';
 
     if(!$.fn.modal) throw new Error('Modal trigger requires modal.js');
@@ -3425,9 +3366,7 @@
         backdrop: true,
         keyboard: true,
         waittime: 0,
-        loadingIcon: 'icon-spinner-indicator',
-        scrollInside: false,
-        // headerHeight: 'auto',
+        loadingIcon: 'icon-spinner-indicator'
     };
 
     ModalTrigger.prototype.init = function(options) {
@@ -3489,10 +3428,7 @@
     };
 
     ModalTrigger.prototype.show = function(option) {
-        var options = $.extend({}, this.options, {
-            url: this.$trigger ? (this.$trigger.attr('href') || this.$trigger.attr('data-url') || this.$trigger.data('url')) : this.options.url
-        }, option);
-
+        var options = $.extend({}, this.options, {url: this.$trigger ? (this.$trigger.attr('href') || this.$trigger.attr('data-url') || this.$trigger.data('url')) : this.options.url}, option);
         this.init(options);
         var that = this,
             $modal = this.$modal,
@@ -3504,8 +3440,7 @@
 
         $modal.toggleClass('fade', options.fade)
             .addClass(options.className)
-            .toggleClass('modal-loading', !this.isShown)
-            .toggleClass('modal-scroll-inside', !!options.scrollInside);
+            .toggleClass('modal-loading', !this.isShown);
 
         $dialog.toggleClass('modal-md', options.size === 'md')
             .toggleClass('modal-sm', options.size === 'sm')
@@ -3523,7 +3458,7 @@
         var resizeDialog = function() {
             clearTimeout(this.resizeTask);
             this.resizeTask = setTimeout(function() {
-                that.ajustPosition(options.position);
+                that.ajustPosition();
             }, 100);
         };
 
@@ -3594,7 +3529,6 @@
 
                 var frame = document.getElementById(iframeName);
                 frame.onload = frame.onreadystatechange = function() {
-                    var scrollInside = !!options.scrollInside;
                     if(that.firstLoad) $modal.addClass('modal-loading');
                     if(this.readyState && this.readyState != 'complete') return;
                     that.firstLoad = false;
@@ -3602,40 +3536,20 @@
                     if(options.waittime > 0) {
                         clearTimeout(that.waitTimeout);
                     }
+
                     try {
                         $modal.attr('ref', frame.contentWindow.location.href);
                         var frame$ = window.frames[iframeName].$;
                         if(frame$ && options.height === 'auto' && options.size != 'fullscreen') {
                             // todo: update iframe url to ref attribute
-
-                            var $framebody = frame$('body').addClass('body-modal').toggleClass('body-modal-scroll-inside', scrollInside);
+                            var $framebody = frame$('body').addClass('body-modal');
                             if(options.iframeBodyClass) $framebody.addClass(options.iframeBodyClass);
-                            var frameSizeRecords = [];
                             var ajustFrameSize = function(check) {
                                 $modal.removeClass('fade');
                                 var height = $framebody.outerHeight();
                                 if(check === true && options.onlyIncreaseHeight) {
                                     height = Math.max(height, $body.data('minModalHeight') || 0);
                                     $body.data('minModalHeight', height);
-                                }
-                                if (scrollInside)
-                                {
-                                    var headerHeight = options.headerHeight;
-                                    if (typeof headerHeight !== 'number') {
-                                        headerHeight = $header.height();
-                                    } else if ($.isFunction(headerHeight)) {
-                                        headerHeight = headerHeight($header);
-                                    }
-                                    var winHeight = $(window).height();
-                                    height = Math.min(height, winHeight - headerHeight);
-
-                                }
-                                if (frameSizeRecords.length > 1 && height === frameSizeRecords[0]) {
-                                    height = Math.max(height, frameSizeRecords[1]);
-                                }
-                                frameSizeRecords.push(height);
-                                while (frameSizeRecords.length > 2) {
-                                    frameSizeRecords.shift();
                                 }
                                 $body.css('height', height);
                                 if(options.fade) $modal.addClass('fade');
@@ -3649,13 +3563,14 @@
 
                             setTimeout(ajustFrameSize, 100);
 
-                            $framebody.off('resize.' + NAME).on('resize.' + NAME, ajustFrameSize);
-                            if (scrollInside) {
-                                $(window).off('resize.' + NAME).on('resize.' + NAME, ajustFrameSize);
-                            }
+                            $framebody.off('resize.' + NAME).on('resize.' + NAME, resizeDialog);
                         } else {
                             readyToShow();
                         }
+
+                        frame$.extend({
+                            closeModal: window.closeModal
+                        });
                     } catch(e) {
                         readyToShow();
                     }
@@ -3666,17 +3581,14 @@
                     success: function(data) {
                         try {
                             var $data = $(data);
-                            if($data.filter('.modal-dialog').length) {
+                            if($data.hasClass('modal-dialog')) {
                                 $dialog.replaceWith($data);
-                            } else if($data.filter('.modal-content').length) {
+                            } else if($data.hasClass('modal-content')) {
                                 $dialog.find('.modal-content').replaceWith($data);
                             } else {
                                 $body.wrapInner($data);
                             }
                         } catch(e) {
-                            if (window.console && window.console.warn) {
-                                console.warn('ZUI: Cannot recogernize remote content.', {error: e, data: data});
-                            }
                             $modal.html(data);
                         }
                         $modal.callComEvent(that, 'loaded', {
@@ -3690,28 +3602,26 @@
         }
 
         $modal.modal({
-            show         : 'show',
-            backdrop     : options.backdrop,
-            moveable     : options.moveable,
-            rememberPos  : options.rememberPos,
-            keyboard     : options.keyboard,
-            scrollInside : options.scrollInside,
+            show       : 'show',
+            backdrop   : options.backdrop,
+            moveable   : options.moveable,
+            rememberPos: options.rememberPos,
+            keyboard   : options.keyboard
         });
     };
 
     ModalTrigger.prototype.close = function(callback, redirect) {
-        var that = this;
         if(callback || redirect) {
-            that.$modal.on('hidden' + ZUI_MODAL, function() {
+            this.$modal.on('hidden' + ZUI_MODAL, function() {
                 if($.isFunction(callback)) callback();
 
-                if(typeof redirect === STR_STRING && redirect.length && !that.$modal.data('cancel-reload')) {
+                if(typeof redirect === STR_STRING) {
                     if(redirect === 'this') window.location.reload();
                     else window.location = redirect;
                 }
             });
         }
-        that.$modal.modal('hide');
+        this.$modal.modal('hide');
     };
 
     ModalTrigger.prototype.toggle = function(options) {
@@ -3720,11 +3630,7 @@
     };
 
     ModalTrigger.prototype.ajustPosition = function(position) {
-        position = position === undefined ? this.options.position : position;
-        if ($.isFunction(position)) {
-            position = position(this);
-        }
-        this.$modal.modal('ajustPosition', position);
+        this.$modal.modal('ajustPosition', position || this.options.position);
     };
 
     $.zui({
@@ -3746,9 +3652,6 @@
             else if(options.show) data.show(settings);
 
             $this.on((options.trigger || 'click') + '.toggle.' + NAME, function(e) {
-                options = $.extend(options, {
-                    url: $this.attr('href') || $this.attr('data-url') || $this.data('url') || options.url
-                });
                 data.toggle(options);
                 if($this.is('a')) e.preventDefault();
             });
@@ -3763,12 +3666,12 @@
             else $this.modalTrigger(option, settings);
         });
     };
-    $.fn.modal.bs = old;
 
     var getModal = function(modal) {
-        if (!modal) {
+        var modalType = typeof(modal);
+        if(modalType === 'undefined') {
             modal = $('.modal.modal-trigger');
-        } else {
+        } else if(modalType === STR_STRING) {
             modal = $(modal);
         }
         if(modal && (modal instanceof $)) return modal;
@@ -3777,7 +3680,6 @@
 
     // callback, redirect, modal
     var closeModal = function(modal, callback, redirect) {
-        var originModal = modal;
         if($.isFunction(modal)) {
             var oldModal = redirect;
             redirect = callback;
@@ -3789,11 +3691,6 @@
             modal.each(function() {
                 $(this).data(NAME).close(callback, redirect);
             });
-        } else if(!$('body').hasClass('modal-open') && !$('.modal.in').length) {
-            // check if current page is as modal iframe
-            if ($('body').hasClass('body-modal')) {
-                window.parent.$.zui.closeModal(originModal, callback, redirect);
-            }
         }
     };
 
@@ -3828,17 +3725,15 @@
         if($this.is('a')) {
             e.preventDefault();
         }
-    }).on('click.' + NAME + '.data-api', '[data-dismiss="modal"]', function() {
-        $.zui.closeModal();
     });
-}(window.jQuery, window, undefined));
+}(window.jQuery, window));
 
 
 /* ========================================================================
  * Bootstrap: tooltip.js v3.0.0
  * http://twzui.github.com/bootstrap/javascript.html#tooltip
  * Inspired by the original jQuery.tipsy by Jason Frame
- *  
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * Bootsrap version in the future.
  * http://zui.sexy
@@ -3874,7 +3769,7 @@
         this.$element = null
 
         this.init('tooltip', element, options)
-    } 
+    }
 
     Tooltip.DEFAULTS = {
         animation: true,
@@ -4025,9 +3920,9 @@
 
                 placement = placement == 'bottom' && pos.top + pos.height + actualHeight - docScroll > parentHeight ? 'top' :
                     placement == 'top' && pos.top - docScroll - actualHeight < 0 ? 'bottom' :
-                    placement == 'right' && pos.right + actualWidth > parentWidth ? 'left' :
-                    placement == 'left' && pos.left - actualWidth < parentLeft ? 'right' :
-                    placement
+                        placement == 'right' && pos.right + actualWidth > parentWidth ? 'left' :
+                            placement == 'left' && pos.left - actualWidth < parentLeft ? 'right' :
+                                placement
 
                 $tip
                     .removeClass(orgPlacement)
@@ -4047,8 +3942,8 @@
 
             $.support.transition && that.$tip.hasClass('fade') ?
                 $tip
-                  .one('bsTransitionEnd', complete)
-                  .emulateTransitionEnd(150) :
+                    .one('bsTransitionEnd', complete)
+                    .emulateTransitionEnd(150) :
                 complete()
         }
     }
@@ -4136,8 +4031,8 @@
 
         $.support.transition && this.$tip.hasClass('fade') ?
             $tip
-            .one($.support.transition.end, complete)
-            .emulateTransitionEnd(150) :
+                .one($.support.transition.end, complete)
+                .emulateTransitionEnd(150) :
             complete()
 
         this.$element.trigger('hidden.zui.' + this.type)
@@ -4170,18 +4065,18 @@
                 left: pos.left + pos.width / 2 - actualWidth / 2
             } :
             placement == 'top' ? {
-                top: pos.top - actualHeight,
-                left: pos.left + pos.width / 2 - actualWidth / 2
-            } :
-            placement == 'left' ? {
-                top: pos.top + pos.height / 2 - actualHeight / 2,
-                left: pos.left - actualWidth
-            } :
-            /* placement == 'right' */
-            {
-                top: pos.top + pos.height / 2 - actualHeight / 2,
-                left: pos.left + pos.width
-            }
+                    top: pos.top - actualHeight,
+                    left: pos.left + pos.width / 2 - actualWidth / 2
+                } :
+                placement == 'left' ? {
+                        top: pos.top + pos.height / 2 - actualHeight / 2,
+                        left: pos.left - actualWidth
+                    } :
+                    /* placement == 'right' */
+                    {
+                        top: pos.top + pos.height / 2 - actualHeight / 2,
+                        left: pos.left + pos.width
+                    }
     }
 
     Tooltip.prototype.getTitle = function() {
@@ -4499,8 +4394,8 @@
         var index = $items.index($items.filter(':focus'))
 
         if(e.keyCode == 38 && index > 0) index-- // up
-            if(e.keyCode == 40 && index < $items.length - 1) index++ // down
-                if(!~index) index = 0
+        if(e.keyCode == 40 && index < $items.length - 1) index++ // down
+        if(!~index) index = 0
 
         $items.eq(index).focus()
     }
@@ -4845,7 +4740,7 @@
 /* ========================================================================
  * Bootstrap: carousel.js v3.0.0
  * http://twzui.github.com/bootstrap/javascript.html#carousel
- * 
+ *
  * ZUI: The file has been changed in ZUI. It will not keep update with the
  * Bootsrap version in the future.
  * http://zui.sexy
@@ -4881,9 +4776,9 @@
         this.options = options
         this.paused =
             this.sliding =
-            this.interval =
-            this.$active =
-            this.$items = null
+                this.interval =
+                    this.$active =
+                        this.$items = null
 
         this.options.pause == 'hover' && this.$element
             .on('mouseenter', $.proxy(this.pause, this))
@@ -5394,7 +5289,7 @@
 
     var id = 0;
     var template = '<div class="messager messager-{type} {placement}" style="display: none"><div class="messager-content"></div><div class="messager-actions"></div></div>';
-    var DEFAULTS = {
+    var defaultOptions = {
         type: 'default',
         placement: 'top',
         time: 4000,
@@ -5418,7 +5313,7 @@
         }
 
         var that = this;
-        options = that.options = $.extend({}, DEFAULTS, options);
+        options = that.options = $.extend({}, defaultOptions, options);
 
         that.id = options.id || (id++);
         var oldMessager = all[that.id];
@@ -5591,7 +5486,6 @@
     };
 
     Messager.all = all;
-    Messager.DEFAULTS = DEFAULTS;
 
     var hideMessage = function() {
         $('.messager').each(function() {
@@ -5844,14 +5738,6 @@
                     that.a = 0;
                 } else if(namedColors[r]) {
                     this.rgb(hexToRgb(namedColors[r]));
-                } else if(r.indexOf('rgb') === 0) {
-                    var rgbsArr = r.substring(r.indexOf('(') + 1, r.lastIndexOf(')')).split(',', 4);
-                    that.rgb({
-                        r: rgbsArr[0],
-                        g: rgbsArr[1],
-                        b: rgbsArr[2],
-                        a: rgbsArr[3],
-                    });
                 } else {
                     that.rgb(hexToRgb(r));
                 }
@@ -6317,7 +6203,6 @@
             idx = 0;
             $parentItem = null;
         }
-        $list.removeClass('has-active-item');
         var $children = $list.attr('data-idx', idx || 0).children('li:not(.tree-action-item)').each(function(index) {
             that._initItem($(this), index + 1, $list);
         });
@@ -6365,9 +6250,6 @@
                 id = $parentList.parent('li').data('id') + '-' + id;
             }
             $item.attr('data-id', id);
-        }
-        if ($item.hasClass('active')) {
-            $parentList.parent('li').addClass('has-active-item');
         }
         data = data || $item.data();
         var actions = formatActions(data.actions, this.actions);
@@ -6566,4 +6448,3 @@
         $('[data-ride="tree"]').tree();
     });
 }(jQuery));
-
